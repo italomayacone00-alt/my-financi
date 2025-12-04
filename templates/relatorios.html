@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FINANZA PRO - Relatórios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        
+        {% include 'navbar.html' %}
+
+        <main class="dashboard-panel">
+            <div class="header-print">
+                <h1>Relatórios & Análises</h1>
+                <p>Visão geral da sua saúde financeira</p>
+            </div>
+
+            <!-- Botões de Ação (Somem na impressão) -->
+            <div class="actions-bar no-print">
+                <a href="{{ url_for('download_csv') }}" class="btn-action btn-csv">
+                    📥 Baixar Planilha (Excel)
+                </a>
+                <button onclick="window.print()" class="btn-action btn-pdf">
+                    🖨️ Imprimir / Salvar PDF
+                </button>
+            </div>
+
+            <!-- Grid de Gráficos -->
+            <div class="report-grid">
+                
+                <!-- Gráfico 1: Barras (Fluxo de Caixa) -->
+                <div class="card chart-card full-width">
+                    <h2>Fluxo de Caixa (Últimos 6 Meses)</h2>
+                    <div class="chart-container-large">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico 2: Pizza (Despesas) -->
+                <div class="card chart-card">
+                    <h2>Despesas por Categoria</h2>
+                    <div class="chart-container-small">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Card de Resumo -->
+                <div class="card summary-card">
+                    <h2>Patrimônio em Investimentos</h2>
+                    <div class="big-number">R$ {{ "%.2f"|format(total_investido) }}</div>
+                    <p>Total acumulado na carteira.</p>
+                    <hr style="border-color: #444; margin: 15px 0;">
+                    <p style="font-size: 0.9em; color: #aaa;">Este relatório foi gerado automaticamente pelo Finanza Pro.</p>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- Gráfico de Barras (Fluxo) ---
+        new Chart(document.getElementById('barChart'), {
+            type: 'bar',
+            data: {
+                labels: {{ chart_meses | safe }},
+                datasets: [
+                    {
+                        label: 'Receitas',
+                        data: {{ chart_receita | safe }},
+                        backgroundColor: 'rgba(76, 175, 80, 0.6)',
+                        borderColor: '#4CAF50',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Despesas',
+                        data: {{ chart_despesa | safe }},
+                        backgroundColor: 'rgba(244, 67, 54, 0.6)',
+                        borderColor: '#F44336',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#aaa' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#aaa' }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: '#fff' } }
+                }
+            }
+        });
+
+        // --- Gráfico de Pizza (Categorias) ---
+        new Chart(document.getElementById('pieChart'), {
+            type: 'doughnut',
+            data: {
+                labels: {{ gastos_cat_labels | safe }},
+                datasets: [{
+                    data: {{ gastos_cat_values | safe }},
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#E7E9ED'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { color: '#ddd' } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

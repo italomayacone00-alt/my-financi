@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FINANZA PRO - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        
+        {% include 'navbar.html' %}
+
+        <main class="dashboard-panel">
+            <h1>Painel de Gestão Financeira Pessoal</h1>
+
+            <div class="dashboard-grid">
+                
+                <div class="card insert-transaction-card">
+                    <h2>Inserir Nova Transação</h2>
+                    <form action="/adicionar_transacao" method="POST">
+                        
+                        <div class="form-group">
+                            <label for="tipo">Tipo de Lançamento:</label>
+                            <div class="radio-group">
+                                <input type="radio" id="despesa" name="tipo" value="Despesa" checked onchange="updateCategories()">
+                                <label for="despesa">Despesa</label>
+                                
+                                <input type="radio" id="receita" name="tipo" value="Receita" onchange="updateCategories()">
+                                <label for="receita">Receita</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="data">Data:</label>
+                            <input type="date" id="data" name="data" value="{{ today_date }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="descricao">Descrição:</label>
+                            <input type="text" id="descricao" name="descricao" placeholder="Ex: Almoço no restaurante">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="valor">Valor (R$):</label>
+                            <input type="number" id="valor" name="valor" step="0.01" placeholder="0.00" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="categoria">Categoria:</label>
+                            <select id="categoria" name="categoria" required>
+                                </select>
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="pagar_com" name="pagar_com">
+                            <label for="pagar_com">Pagar com</label>
+                            <select id="pagar_com_opcao" name="pagar_com_opcao">
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Débito">Débito</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Pix">Pix</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="save-transaction-btn">Salvar Transação</button>
+                    </form>
+                </div>
+
+                <div class="right-panel">
+                    
+                    <div class="card recent-summary-card">
+                        <h2>Resumo Recente</h2>
+                        <div class="summary-item">
+                            <span>Saldo Atual</span>
+                            <span class="value green">R$ {{ "%.2f"|format(saldo_atual) }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Despesa Total</span>
+                            <span class="value red">R$ {{ "%.2f"|format(despesa_total) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="card balance-graph-card">
+                        <h2>Gráfico de Saldo (Últimos 30 dias)</h2>
+                        <div class="graph-info">
+                            <span class="green">Receita Total: R$ {{ "%.2f"|format(receita_30_dias) }}</span>
+                            <span class="red">Despesa Total: R$ {{ "%.2f"|format(despesa_30_dias) }}</span>
+                        </div>
+                        <div class="graph-container">
+                            <canvas id="balanceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card upcoming-due-card">
+                        <h2>Próximos Vencimentos</h2>
+                        <div style="text-align: center; padding: 20px; color: var(--light-text-color);">
+                            <p><i>Nenhum vencimento registrado.</i></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Carrega categorias do Flask/Python
+        const categories = {{ categorias | tojson | safe }};
+
+        // Função para atualizar o Select de Categorias
+        function updateCategories() {
+            const tipoSelecionado = document.querySelector('input[name="tipo"]:checked').value;
+            const selectCategoria = document.getElementById('categoria');
+            selectCategoria.innerHTML = ''; // Limpa as opções atuais
+
+            if (categories[tipoSelecionado]) {
+                categories[tipoSelecionado].forEach(categoria => {
+                    const option = document.createElement('option');
+                    option.value = categoria;
+                    option.textContent = categoria;
+                    selectCategoria.appendChild(option);
+                });
+            }
+
+            // Fallback caso não haja categorias
+            if (selectCategoria.options.length === 0) {
+                const defaultOption = document.createElement('option');
+                defaultOption.value = "";
+                defaultOption.textContent = "Selecione uma categoria";
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                selectCategoria.appendChild(defaultOption);
+            }
+        }
+
+        // Executa ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCategories();
+        });
+
+        // Configuração do Gráfico (Chart.js)
+        const ctx = document.getElementById('balanceChart').getContext('2d');
+        const chartLabels = {{ chart_labels | safe }};
+        const chartData = {{ chart_data | safe }};
+
+        const balanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Saldo Cumulativo',
+                    data: chartData,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#a0a0a0' }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: {
+                            color: '#a0a0a0',
+                            callback: function(value) {
+                                return 'R$ ' + value.toLocaleString('pt-BR');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

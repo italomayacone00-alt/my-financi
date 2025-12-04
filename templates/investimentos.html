@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FINANZA PRO - Investimentos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        
+        {% include 'navbar.html' %}
+
+        <main class="dashboard-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1>Carteira de Investimentos</h1>
+                <div class="card" style="padding: 10px 20px; background: #2c3e50; border: 1px solid #4CAF50;">
+                    <span style="color: #bbb; font-size: 0.9em;">Total Acumulado</span>
+                    <div style="font-size: 1.5em; color: #4CAF50; font-weight: bold;">R$ {{ "%.2f"|format(total_investido) }}</div>
+                </div>
+            </div>
+
+            <div class="card insert-transaction-card" style="margin-bottom: 30px;">
+                <h2>Novo Aporte</h2>
+                <form action="/adicionar_investimento" method="POST" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                    
+                    <div class="form-group" style="flex: 2; min-width: 200px; margin-bottom: 0;">
+                        <label for="nome">Ativo (Nome):</label>
+                        <input type="text" id="nome" name="nome" placeholder="Ex: Tesouro Direto, Nubank, Ações Petrobras" required>
+                    </div>
+
+                    <div class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+                        <label for="tipo">Tipo:</label>
+                        <select id="tipo" name="tipo">
+                            <option value="Renda Fixa">Renda Fixa (CDB/Tesouro)</option>
+                            <option value="Ações">Ações / FIIs</option>
+                            <option value="Cripto">Criptomoedas</option>
+                            <option value="Reserva">Reserva de Emergência</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+                        <label for="valor">Valor Atual (R$):</label>
+                        <input type="number" id="valor" name="valor" step="0.01" placeholder="0.00" required>
+                    </div>
+
+                    <div class="form-group" style="flex: 2; min-width: 200px; margin-bottom: 0;">
+                        <label for="descricao">Nota (Opcional):</label>
+                        <input type="text" id="descricao" name="descricao" placeholder="Ex: Foco em longo prazo">
+                    </div>
+
+                    <button type="submit" class="save-transaction-btn" style="margin-top: 0; padding: 12px 25px;">Adicionar</button>
+                </form>
+            </div>
+
+            <div class="invest-grid">
+                {% for item in investimentos %}
+                <div class="card invest-card">
+                    <div class="invest-header">
+                        <div class="invest-icon {{ item.tipo.split(' ')[0].lower() }}">
+                            {% if 'Fixa' in item.tipo %}🛡️{% elif 'Ações' in item.tipo %}📈{% elif 'Cripto' in item.tipo %}₿{% else %}💰{% endif %}
+                        </div>
+                        <a href="{{ url_for('excluir_investimento', indice=loop.index0) }}" class="btn-delete-small" onclick="return confirm('Resgatar/Excluir este investimento?')">✕</a>
+                    </div>
+                    
+                    <h3>{{ item.nome }}</h3>
+                    <span class="badge badge-neutral">{{ item.tipo }}</span>
+                    
+                    <div class="invest-value">R$ {{ "%.2f"|format(item.valor) }}</div>
+                    
+                    <p class="invest-desc">{{ item.descricao }}</p>
+                </div>
+                {% else %}
+                <p style="color: #aaa; grid-column: 1/-1; text-align: center;">Nenhum investimento registrado.</p>
+                {% endfor %}
+            </div>
+
+        </main>
+    </div>
+</body>
+</html>

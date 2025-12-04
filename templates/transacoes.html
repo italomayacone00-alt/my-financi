@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FINANZA PRO - Transações</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        
+        {% include 'navbar.html' %}
+
+        <main class="dashboard-panel">
+            <h1>Histórico de Transações</h1>
+
+            <div class="card full-width-card">
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Descrição</th>
+                            <th>Categoria</th>
+                            <th>Valor</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in transacoes %}
+                        <tr>
+                            <td>{{ item.data.split('-')[2] }}/{{ item.data.split('-')[1] }}/{{ item.data.split('-')[0] }}</td>
+                            
+                            <td>
+                                <span class="badge {{ 'badge-receita' if item.tipo == 'Receita' else 'badge-despesa' }}">
+                                    {{ item.tipo }}
+                                </span>
+                            </td>
+                            <td>{{ item.descricao }}</td>
+                            <td>{{ item.categoria }}</td>
+                            <td class="{{ 'green' if item.tipo == 'Receita' else 'red' }}">
+                                R$ {{ "%.2f"|format(item.valor) }}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('excluir_transacao', indice=loop.index0) }}" class="btn-delete" onclick="return confirm('Tem certeza que deseja excluir?')">🗑️</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align:center;">Nenhuma transação encontrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

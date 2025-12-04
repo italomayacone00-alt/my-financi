@@ -1,0 +1,48 @@
+<header class="navbar">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Finanza Pro Logo">
+        <span>FINANZA PRO</span>
+    </div>
+    <nav>
+        <ul>
+            <li>
+                <a href="{{ url_for('index') }}" 
+                   class="{{ 'active' if request.endpoint == 'index' else '' }}">
+                   Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('transacoes_page') }}" 
+                   class="{{ 'active' if request.endpoint == 'transacoes_page' else '' }}">
+                   Transações
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('investimentos_page') }}" 
+                   class="{{ 'active' if request.endpoint == 'investimentos_page' else '' }}">
+                   Investimentos
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('relatorios_page') }}" 
+                   class="{{ 'active' if request.endpoint == 'relatorios_page' else '' }}">
+                   Relatórios
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('configuracoes_page') }}" 
+                   class="{{ 'active' if request.endpoint == 'configuracoes_page' else '' }}">
+                   Configurações
+                </a>
+            </li>
+
+            <!-- BOTÃO DE SAIR (LOGOUT) -->
+            <!-- Adicionei um estilo inline aqui para criar uma separação visual -->
+            <li style="margin-left: 15px; border-left: 1px solid #444; padding-left: 15px;">
+                <a href="{{ url_for('logout') }}" style="color: #F44336; font-weight: 600;">
+                    Sair 🚪
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>

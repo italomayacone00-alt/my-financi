@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FINANZA PRO - Configurações</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        
+        {% include 'navbar.html' %}
+
+        <main class="dashboard-panel">
+            <h1>Configurações do Sistema</h1>
+            <p style="color: #aaa; margin-bottom: 30px;">Gerencie suas preferências e dados.</p>
+
+            <div class="settings-grid">
+                
+                <!-- Card de Perfil -->
+                <div class="card">
+                    <h2>👤 Perfil & Preferências</h2>
+                    <form action="/salvar_configuracoes" method="POST">
+                        <div class="form-group">
+                            <label for="nome_usuario">Nome de Exibição:</label>
+                            <input type="text" id="nome_usuario" name="nome_usuario" value="{{ config.nome_usuario }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Moeda Padrão:</label>
+                            <select disabled style="opacity: 0.6; cursor: not-allowed;">
+                                <option>BRL (R$) - Real Brasileiro</option>
+                            </select>
+                            <small style="color: #666;">(Moeda fixa nesta versão)</small>
+                        </div>
+                        <button type="submit" class="save-transaction-btn">Salvar Alterações</button>
+                    </form>
+                </div>
+
+                <!-- Card de Sobre -->
+                <div class="card info-card">
+                    <h2>ℹ️ Sobre o Sistema</h2>
+                    <p><strong>Versão:</strong> 1.0.0 (Beta)</p>
+                    <p><strong>Desenvolvido com:</strong> Python (Flask) + Jinja2</p>
+                    <p><strong>Armazenamento:</strong> JSON Local</p>
+                    <div style="margin-top: 20px; padding: 10px; background: rgba(33, 150, 243, 0.1); border-radius: 5px; border-left: 3px solid #2196F3;">
+                        <p style="font-size: 0.9em; color: #2196F3;">Dica: Faça backup dos seus dados na aba "Relatórios" antes de realizar limpezas.</p>
+                    </div>
+                </div>
+
+                <!-- Zona de Perigo -->
+                <div class="card danger-zone">
+                    <h2 style="color: #F44336; border-bottom-color: #F44336;">⚠️ Zona de Perigo</h2>
+                    <p>Ações irreversíveis. Tenha cuidado.</p>
+                    
+                    <div class="danger-actions">
+                        <div class="danger-item">
+                            <span>Excluir todas as Transações</span>
+                            <a href="{{ url_for('acao_perigo', tipo='limpar_transacoes') }}" 
+                               class="btn-danger" 
+                               onclick="return confirm('Tem certeza? Isso apagará TODO o seu histórico de receitas e despesas.')">
+                               Limpar Histórico
+                            </a>
+                        </div>
+
+                        <div class="danger-item">
+                            <span>Excluir Carteira de Investimentos</span>
+                            <a href="{{ url_for('acao_perigo', tipo='limpar_investimentos') }}" 
+                               class="btn-danger" 
+                               onclick="return confirm('Tem certeza? Isso zerará seus investimentos.')">
+                               Zerar Carteira
+                            </a>
+                        </div>
+
+                        <div class="danger-item">
+                            <span><strong>Reset de Fábrica</strong> (Apagar Tudo)</span>
+                            <a href="{{ url_for('acao_perigo', tipo='reset_fabrica') }}" 
+                               class="btn-danger btn-reset-all" 
+                               onclick="return confirm('ATENÇÃO: Isso apagará TUDO e restaurará o sistema para o zero. Continuar?')">
+                               RESETAR SISTEMA
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</body>
+</html>
